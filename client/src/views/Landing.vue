@@ -16,7 +16,7 @@
         </button>
       </div>
       <div class="nav-user">
-        <span class="welcome-text">Welcome, {{ user?.name || 'User' }}</span>
+        <span class="welcome-text">Welcome, {{ authStore.userProfile?.name || 'User' }}</span>
         <button @click="handleLogout" class="logout-btn">Logout</button>
       </div>
     </nav>
@@ -37,10 +37,10 @@
             <div class="card-icon">👤</div>
             <h3>Profile Information</h3>
             <div class="profile-info">
-              <p><strong>Name:</strong> {{ user?.name || 'N/A' }}</p>
-              <p><strong>Email:</strong> {{ user?.email || 'N/A' }}</p>
-              <p><strong>User ID:</strong> {{ user?.id || 'N/A' }}</p>
-              <p><strong>Member Since:</strong> {{ formatDate(user?.createdAt) }}</p>
+              <p><strong>Name:</strong> {{ authStore.userProfile?.name || 'N/A' }}</p>
+              <p><strong>Email:</strong> {{ authStore.userProfile?.email || 'N/A' }}</p>
+              <p><strong>User ID:</strong> {{ authStore.userProfile?.id || 'N/A' }}</p>
+              <p><strong>Member Since:</strong> {{ formatDate(authStore.userProfile?.createdAt) }}</p>
             </div>
           </div>
           
@@ -110,8 +110,8 @@
                 />
               </div>
               
-              <button type="submit" :disabled="loading" class="update-btn">
-                {{ loading ? 'Updating...' : 'Update Profile' }}
+              <button type="submit" :disabled="authStore.isLoading" class="update-btn">
+                {{ authStore.isLoading ? 'Updating...' : 'Update Profile' }}
               </button>
             </form>
           </div>
@@ -152,8 +152,8 @@
                 />
               </div>
               
-              <button type="submit" :disabled="loading" class="update-btn">
-                {{ loading ? 'Changing...' : 'Change Password' }}
+              <button type="submit" :disabled="authStore.isLoading" class="update-btn">
+                {{ authStore.isLoading ? 'Changing...' : 'Change Password' }}
               </button>
             </form>
           </div>
@@ -172,15 +172,15 @@
             <h3>Theme Preferences</h3>
             <div class="setting-item">
               <label>Dark Mode</label>
-              <input type="checkbox" v-model="settings.darkMode" @change="toggleTheme" />
+              <input type="checkbox" v-model="settingsStore.settings.darkMode" @change="settingsStore.toggleTheme()" />
             </div>
             <div class="setting-item">
               <label>Notifications</label>
-              <input type="checkbox" v-model="settings.notifications" />
+              <input type="checkbox" v-model="settingsStore.settings.notifications" />
             </div>
             <div class="setting-item">
               <label>Auto Refresh</label>
-              <input type="checkbox" v-model="settings.autoRefresh" />
+              <input type="checkbox" v-model="settingsStore.settings.autoRefresh" />
             </div>
           </div>
           
@@ -188,11 +188,11 @@
             <h3>Data Management</h3>
             <div class="setting-item">
               <label>Session Timeout (minutes)</label>
-              <input type="number" v-model="settings.sessionTimeout" min="5" max="120" />
+              <input type="number" v-model="settingsStore.settings.sessionTimeout" min="5" max="120" />
             </div>
             <div class="setting-item">
               <label>Cache Duration (hours)</label>
-              <input type="number" v-model="settings.cacheDuration" min="1" max="24" />
+              <input type="number" v-model="settingsStore.settings.cacheDuration" min="1" max="24" />
             </div>
           </div>
           
@@ -200,21 +200,21 @@
             <h3>API Configuration</h3>
             <div class="setting-item">
               <label>API Base URL</label>
-              <input type="text" v-model="settings.apiUrl" placeholder="http://localhost:5000/api" />
+              <input type="text" v-model="settingsStore.settings.apiUrl" placeholder="http://localhost:5000/api" />
             </div>
             <div class="setting-item">
               <label>Request Timeout (seconds)</label>
-              <input type="number" v-model="settings.requestTimeout" min="5" max="60" />
+              <input type="number" v-model="settingsStore.settings.requestTimeout" min="5" max="60" />
             </div>
           </div>
         </div>
         
         <div class="settings-actions">
-          <button @click="saveSettings" :disabled="loading" class="save-btn">
-            {{ loading ? 'Saving...' : 'Save Settings' }}
+          <button @click="saveSettings" :disabled="settingsStore.isLoading" class="save-btn">
+            {{ settingsStore.isLoading ? 'Saving...' : 'Save Settings' }}
           </button>
-          <button @click="resetSettings" :disabled="loading" class="reset-btn">
-            {{ loading ? 'Resetting...' : 'Reset to Default' }}
+          <button @click="resetSettings" :disabled="settingsStore.isLoading" class="reset-btn">
+            {{ settingsStore.isLoading ? 'Resetting...' : 'Reset to Default' }}
           </button>
         </div>
       </div>
@@ -231,15 +231,15 @@
             <h3>Session Statistics</h3>
             <div class="stat-item">
               <span class="stat-label">Login Time:</span>
-              <span class="stat-value">{{ sessionStats.loginTime }}</span>
+              <span class="stat-value">{{ analyticsStore.currentSessionStats.loginTime }}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Session Duration:</span>
-              <span class="stat-value">{{ sessionStats.duration }}</span>
+              <span class="stat-value">{{ analyticsStore.currentSessionStats.duration }}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">API Calls:</span>
-              <span class="stat-value">{{ sessionStats.apiCalls }}</span>
+              <span class="stat-value">{{ analyticsStore.currentSessionStats.apiCalls }}</span>
             </div>
           </div>
           
@@ -247,22 +247,22 @@
             <h3>System Performance</h3>
             <div class="stat-item">
               <span class="stat-label">Memory Usage:</span>
-              <span class="stat-value">{{ performanceStats.memory }}%</span>
+              <span class="stat-value">{{ analyticsStore.currentPerformanceStats.memory }}%</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">CPU Usage:</span>
-              <span class="stat-value">{{ performanceStats.cpu }}%</span>
+              <span class="stat-value">{{ analyticsStore.currentPerformanceStats.cpu }}%</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Network Status:</span>
-              <span class="stat-value status-success">{{ performanceStats.network }}</span>
+              <span class="stat-value status-success">{{ analyticsStore.currentPerformanceStats.network }}</span>
             </div>
           </div>
           
           <div class="analytics-card">
             <h3>Recent Activity</h3>
             <div class="activity-list">
-              <div v-for="activity in recentActivity" :key="activity.id" class="activity-item">
+              <div v-for="activity in analyticsStore.activityLog" :key="activity.id" class="activity-item">
                 <span class="activity-time">{{ activity.time }}</span>
                 <span class="activity-text">{{ activity.text }}</span>
               </div>
@@ -281,14 +281,17 @@
 
 <script setup>
 import { ref, onMounted, computed, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import { useSettingsStore } from '../stores/settings'
+import { useAnalyticsStore } from '../stores/analytics'
 
-const router = useRouter()
-const user = ref(null)
+const authStore = useAuthStore()
+const settingsStore = useSettingsStore()
+const analyticsStore = useAnalyticsStore()
+
+const activeTab = ref('dashboard')
 const apiMessage = ref('')
 const apiMessageType = ref('')
-const loading = ref(false)
-const activeTab = ref('dashboard')
 
 // Profile form
 const profileForm = ref({
@@ -303,36 +306,6 @@ const passwordForm = ref({
   confirmPassword: ''
 })
 
-// Settings
-const settings = ref({
-  darkMode: false,
-  notifications: true,
-  autoRefresh: false,
-  sessionTimeout: 30,
-  cacheDuration: 2,
-  apiUrl: 'http://localhost:5000/api',
-  requestTimeout: 10
-})
-
-// Analytics data
-const sessionStats = ref({
-  loginTime: '',
-  duration: '0:00:00',
-  apiCalls: 0
-})
-
-const performanceStats = ref({
-  memory: 45,
-  cpu: 23,
-  network: 'Connected'
-})
-
-const recentActivity = ref([
-  { id: 1, time: '2 min ago', text: 'Profile refreshed successfully' },
-  { id: 2, time: '5 min ago', text: 'API health check completed' },
-  { id: 3, time: '10 min ago', text: 'User logged in' }
-])
-
 // Navigation tabs
 const tabs = [
   { id: 'dashboard', name: 'Dashboard' },
@@ -342,57 +315,34 @@ const tabs = [
 ]
 
 const tokenPreview = computed(() => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    return token.substring(0, 20) + '...'
+  if (authStore.token) {
+    return authStore.token.substring(0, 20) + '...'
   }
   return 'No token'
 })
 
-let sessionStartTime = null
-let sessionTimer = null
-
-onMounted(() => {
-  const storedUser = localStorage.getItem('user')
-  if (storedUser) {
-    user.value = JSON.parse(storedUser)
-    profileForm.value.name = user.value.name
-    profileForm.value.email = user.value.email
-  } else {
-    router.push('/login')
+onMounted(async () => {
+  // Check authentication
+  const isAuthenticated = await authStore.checkAuth()
+  if (!isAuthenticated) {
+    window.location.href = '/login'
     return
   }
   
-  // Initialize session
-  sessionStartTime = new Date()
-  sessionStats.value.loginTime = sessionStartTime.toLocaleTimeString()
-  startSessionTimer()
+  // Initialize stores
+  settingsStore.loadSettings()
+  analyticsStore.startSession()
   
-  // Load settings from localStorage
-  const savedSettings = localStorage.getItem('appSettings')
-  if (savedSettings) {
-    settings.value = { ...settings.value, ...JSON.parse(savedSettings) }
+  // Set profile form data
+  if (authStore.userProfile) {
+    profileForm.value.name = authStore.userProfile.name
+    profileForm.value.email = authStore.userProfile.email
   }
 })
 
 onUnmounted(() => {
-  if (sessionTimer) {
-    clearInterval(sessionTimer)
-  }
+  analyticsStore.stopSession()
 })
-
-const startSessionTimer = () => {
-  sessionTimer = setInterval(() => {
-    if (sessionStartTime) {
-      const now = new Date()
-      const diff = now - sessionStartTime
-      const hours = Math.floor(diff / (1000 * 60 * 60))
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
-      sessionStats.value.duration = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-    }
-  }, 1000)
-}
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
@@ -400,41 +350,23 @@ const formatDate = (dateString) => {
 }
 
 const handleLogout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  router.push('/login')
+  analyticsStore.stopSession()
+  authStore.logout()
 }
 
 const refreshProfile = async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    apiMessage.value = 'No authentication token found'
-    apiMessageType.value = 'error'
-    return
-  }
+  const result = await authStore.updateProfile({
+    name: profileForm.value.name,
+    email: profileForm.value.email
+  })
   
-  try {
-    const response = await fetch('http://localhost:5000/api/profile', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    
-    if (response.ok) {
-      const profileData = await response.json()
-      user.value = profileData
-      profileForm.value.name = profileData.name
-      profileForm.value.email = profileData.email
-      apiMessage.value = 'Profile refreshed successfully!'
-      apiMessageType.value = 'success'
-      sessionStats.value.apiCalls++
-      addActivity('Profile refreshed successfully')
-    } else {
-      apiMessage.value = 'Failed to refresh profile'
-      apiMessageType.value = 'error'
-    }
-  } catch (error) {
-    apiMessage.value = 'Network error while refreshing profile'
+  if (result.success) {
+    apiMessage.value = 'Profile refreshed successfully!'
+    apiMessageType.value = 'success'
+    analyticsStore.addActivity('Profile refreshed successfully')
+    analyticsStore.incrementApiCalls()
+  } else {
+    apiMessage.value = result.error || 'Failed to refresh profile'
     apiMessageType.value = 'error'
   }
   
@@ -450,8 +382,8 @@ const testAPI = async () => {
       const data = await response.json()
       apiMessage.value = `API Test: ${data.message}`
       apiMessageType.value = 'success'
-      sessionStats.value.apiCalls++
-      addActivity('API health check completed')
+      analyticsStore.addActivity('API health check completed')
+      analyticsStore.incrementApiCalls()
     } else {
       apiMessage.value = 'API test failed'
       apiMessageType.value = 'error'
@@ -467,58 +399,30 @@ const testAPI = async () => {
 }
 
 const clearCache = () => {
-  localStorage.removeItem('appSettings')
-  settings.value = {
-    darkMode: false,
-    notifications: true,
-    autoRefresh: false,
-    sessionTimeout: 30,
-    cacheDuration: 2,
-    apiUrl: 'http://localhost:5000/api',
-    requestTimeout: 10
-  }
+  settingsStore.resetSettings()
   apiMessage.value = 'Cache cleared successfully'
   apiMessageType.value = 'success'
-  addActivity('Application cache cleared')
+  analyticsStore.addActivity('Application cache cleared')
   setTimeout(() => {
     apiMessage.value = ''
   }, 3000)
 }
 
 const updateProfile = async () => {
-  loading.value = true
-  try {
-    const token = localStorage.getItem('token')
-    const response = await fetch('http://localhost:5000/api/profile', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        name: profileForm.value.name,
-        email: profileForm.value.email
-      })
-    })
-    
-    if (response.ok) {
-      const data = await response.json()
-      user.value = data.user
-      localStorage.setItem('user', JSON.stringify(data.user))
-      apiMessage.value = 'Profile updated successfully!'
-      apiMessageType.value = 'success'
-      addActivity('Profile information updated')
-    } else {
-      const errorData = await response.json()
-      apiMessage.value = errorData.message || 'Failed to update profile'
-      apiMessageType.value = 'error'
-    }
-  } catch (error) {
-    apiMessage.value = 'Network error while updating profile'
+  const result = await authStore.updateProfile({
+    name: profileForm.value.name,
+    email: profileForm.value.email
+  })
+  
+  if (result.success) {
+    apiMessage.value = 'Profile updated successfully!'
+    apiMessageType.value = 'success'
+    analyticsStore.addActivity('Profile information updated')
+  } else {
+    apiMessage.value = result.error || 'Failed to update profile'
     apiMessageType.value = 'error'
   }
   
-  loading.value = false
   setTimeout(() => {
     apiMessage.value = ''
   }, 3000)
@@ -531,80 +435,39 @@ const changePassword = async () => {
     return
   }
   
-  loading.value = true
-  try {
-    const token = localStorage.getItem('token')
-    const response = await fetch('http://localhost:5000/api/auth/change-password', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        currentPassword: passwordForm.value.currentPassword,
-        newPassword: passwordForm.value.newPassword
-      })
-    })
-    
-    if (response.ok) {
-      apiMessage.value = 'Password changed successfully!'
-      apiMessageType.value = 'success'
-      passwordForm.value = {
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      }
-      addActivity('Password changed successfully')
-    } else {
-      const errorData = await response.json()
-      apiMessage.value = errorData.message || 'Failed to change password'
-      apiMessageType.value = 'error'
+  const result = await authStore.changePassword({
+    currentPassword: passwordForm.value.currentPassword,
+    newPassword: passwordForm.value.newPassword
+  })
+  
+  if (result.success) {
+    apiMessage.value = 'Password changed successfully!'
+    apiMessageType.value = 'success'
+    passwordForm.value = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
     }
-  } catch (error) {
-    apiMessage.value = 'Network error while changing password'
+    analyticsStore.addActivity('Password changed successfully')
+  } else {
+    apiMessage.value = result.error || 'Failed to change password'
     apiMessageType.value = 'error'
   }
   
-  loading.value = false
   setTimeout(() => {
     apiMessage.value = ''
   }, 3000)
 }
 
-const toggleTheme = () => {
-  document.body.classList.toggle('dark-mode', settings.value.darkMode)
-}
-
 const saveSettings = async () => {
-  try {
-    const token = localStorage.getItem('token')
-    const response = await fetch('http://localhost:5000/api/settings', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        settings: {
-          theme: settings.value.darkMode ? 'dark' : 'light',
-          notifications: settings.value.notifications,
-          autoRefresh: settings.value.autoRefresh
-        }
-      })
-    })
-    
-    if (response.ok) {
-      localStorage.setItem('appSettings', JSON.stringify(settings.value))
-      apiMessage.value = 'Settings saved successfully!'
-      apiMessageType.value = 'success'
-      addActivity('Application settings updated')
-    } else {
-      const errorData = await response.json()
-      apiMessage.value = errorData.message || 'Failed to save settings'
-      apiMessageType.value = 'error'
-    }
-  } catch (error) {
-    apiMessage.value = 'Network error while saving settings'
+  const result = await settingsStore.saveSettings()
+  
+  if (result.success) {
+    apiMessage.value = 'Settings saved successfully!'
+    apiMessageType.value = 'success'
+    analyticsStore.addActivity('Application settings updated')
+  } else {
+    apiMessage.value = result.error || 'Failed to save settings'
     apiMessageType.value = 'error'
   }
   
@@ -614,39 +477,13 @@ const saveSettings = async () => {
 }
 
 const resetSettings = () => {
-  settings.value = {
-    darkMode: false,
-    notifications: true,
-    autoRefresh: false,
-    sessionTimeout: 30,
-    cacheDuration: 2,
-    apiUrl: 'http://localhost:5000/api',
-    requestTimeout: 10
-  }
-  localStorage.removeItem('appSettings')
+  settingsStore.resetSettings()
   apiMessage.value = 'Settings reset to default'
   apiMessageType.value = 'success'
-  addActivity('Settings reset to default')
+  analyticsStore.addActivity('Settings reset to default')
   setTimeout(() => {
     apiMessage.value = ''
   }, 3000)
-}
-
-const addActivity = (text) => {
-  const now = new Date()
-  const timeString = now.toLocaleTimeString()
-  const timeAgo = 'Just now'
-  
-  recentActivity.value.unshift({
-    id: Date.now(),
-    time: timeAgo,
-    text: text
-  })
-  
-  // Keep only last 10 activities
-  if (recentActivity.value.length > 10) {
-    recentActivity.value = recentActivity.value.slice(0, 10)
-  }
 }
 </script>
 

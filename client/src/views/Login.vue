@@ -33,12 +33,12 @@
           <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
         </div>
         
-        <button type="submit" :disabled="loading" class="login-btn">
-          {{ loading ? 'Signing in...' : 'Sign In' }}
+        <button type="submit" :disabled="authStore.isLoading" class="login-btn">
+          {{ authStore.isLoading ? 'Signing in...' : 'Sign In' }}
         </button>
         
-        <div v-if="error" class="error-alert">
-          {{ error }}
+        <div v-if="authStore.authError" class="error-alert">
+          {{ authStore.authError }}
         </div>
         
         <div class="register-link">
@@ -82,8 +82,8 @@
           />
         </div>
         
-        <button type="submit" :disabled="loading" class="register-btn">
-          {{ loading ? 'Creating account...' : 'Create Account' }}
+        <button type="submit" :disabled="authStore.isLoading" class="register-btn">
+          {{ authStore.isLoading ? 'Creating account...' : 'Create Account' }}
         </button>
         
         <div class="login-link">
@@ -96,13 +96,10 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth'
 
-const router = useRouter()
-
-const loading = ref(false)
-const error = ref('')
+const authStore = useAuthStore()
 const showRegister = ref(false)
 
 const form = reactive({
@@ -121,7 +118,13 @@ const errors = reactive({
   password: ''
 })
 
-const API_BASE_URL = 'http://localhost:5000/api'
+onMounted(() => {
+  // Check if user is already authenticated
+  if (authStore.isAuthenticated) {
+    // Redirect to landing if already logged in
+    window.location.href = '/landing'
+  }
+})
 
 const validateForm = () => {
   errors.email = ''
@@ -145,60 +148,24 @@ const validateForm = () => {
 const handleSubmit = async () => {
   if (!validateForm()) return
   
-  loading.value = true
-  error.value = ''
+  const result = await authStore.login(form)
   
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(form)
-    })
-    
-    const data = await response.json()
-    
-    if (response.ok) {
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      router.push('/landing')
-    } else {
-      error.value = data.message || 'Login failed'
-    }
-  } catch (err) {
-    error.value = 'Network error. Please try again.'
-  } finally {
-    loading.value = false
+  if (!result.success) {
+    // Error is already set in the store
+    setTimeout(() => {
+      authStore.clearError()
+    }, 5000)
   }
 }
 
 const handleRegister = async () => {
-  loading.value = true
-  error.value = ''
+  const result = await authStore.register(registerForm)
   
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(registerForm)
-    })
-    
-    const data = await response.json()
-    
-    if (response.ok) {
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
-      router.push('/landing')
-    } else {
-      error.value = data.message || 'Registration failed'
-    }
-  } catch (err) {
-    error.value = 'Network error. Please try again.'
-  } finally {
-    loading.value = false
+  if (!result.success) {
+    // Error is already set in the store
+    setTimeout(() => {
+      authStore.clearError()
+    }, 5000)
   }
 }
 </script>
