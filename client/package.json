@@ -4,9 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node setup-env.js development && vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:dev": "node setup-env.js development && vite build --mode development",
+    "build:prod": "node setup-env.js production && vite build --mode production",
+    "preview": "vite preview",
+    "preview:dev": "node setup-env.js development && vite preview --mode development",
+    "preview:prod": "node setup-env.js production && vite preview --mode production"
   },
   "dependencies": {
     "pinia": "^3.0.3",

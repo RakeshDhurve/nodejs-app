@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mevn-app', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/nodejs-app', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

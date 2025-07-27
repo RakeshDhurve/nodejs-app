@@ -62,6 +62,35 @@ A comprehensive full-stack application built with the MEVN stack (MongoDB, Expre
 4. **Configure environment variables**
    - The default configuration is in `server/config.env`
    - You can modify the MongoDB URI and JWT secret as needed
+   - Client environment files are in `client/env.development` and `client/env.production`
+
+## Environment Configuration
+
+### Client Environment Variables
+
+The application uses environment-specific configuration files for the client:
+
+- **Development**: `client/env.development` - Uses `http://localhost:5000`
+- **Production**: `client/env.production` - Uses your production domain
+
+#### Environment Variables Available:
+- `VITE_API_URL` - Backend API URL
+- `VITE_APP_TITLE` - Application title
+- `VITE_APP_VERSION` - Application version
+- `VITE_APP_ENV` - Environment name
+
+#### Updating Production URL:
+Edit `client/env.production` and change:
+```
+VITE_API_URL=https://your-domain.com
+```
+
+### Server Environment Variables
+
+Server configuration is in `server/config.env`:
+- `PORT` - Server port (default: 5000)
+- `MONGODB_URI` - MongoDB connection string
+- `JWT_SECRET` - JWT signing secret
 
 ## Running the Application
 
@@ -84,6 +113,24 @@ npm run server
 **Frontend only:**
 ```bash
 npm run client
+```
+
+### Building for Different Environments
+
+**Development build:**
+```bash
+npm run build:dev
+```
+
+**Production build:**
+```bash
+npm run build:prod
+```
+
+**Preview builds:**
+```bash
+npm run preview:dev    # Preview development build
+npm run preview:prod   # Preview production build
 ```
 
 ## API Endpoints

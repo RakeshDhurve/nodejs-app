@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { getApiUrl } from '../utils/env'
 
 export const useSettingsStore = defineStore('settings', () => {
   // State
@@ -45,7 +46,7 @@ export const useSettingsStore = defineStore('settings', () => {
         return { success: true }
       }
 
-      const response = await fetch('http://localhost:5000/api/settings', {
+      const response = await fetch(getApiUrl('/api/settings'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

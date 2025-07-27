@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { getApiUrl } from '../utils/env'
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
@@ -23,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = ''
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(getApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -57,7 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = ''
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(getApiUrl('/api/auth/register'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -105,7 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
       
       // Verify token is still valid
       try {
-        const response = await fetch('http://localhost:5000/api/profile', {
+        const response = await fetch(getApiUrl('/api/profile'), {
           headers: {
             'Authorization': `Bearer ${storedToken}`
           }
@@ -131,7 +132,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = ''
     
     try {
-      const response = await fetch('http://localhost:5000/api/profile', {
+      const response = await fetch(getApiUrl('/api/profile'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +164,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = ''
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/change-password', {
+      const response = await fetch(getApiUrl('/api/auth/change-password'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
